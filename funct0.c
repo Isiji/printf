@@ -1,9 +1,9 @@
 #include "main.h"
 
-/************************* PRINT CHAR *************************/
+/* PRINT CHARACTER FUNCTION*/
 
 /**
- * print_char - Prints a char
+ * print_char - Prints a character
  * @types: List a of arguments
  * @buffer: Buffer array to handle print
  * @flags:  Calculates active flags
@@ -19,7 +19,7 @@ int print_char(va_list types, char buffer[],
 
 	return (handle_write_char(c, buffer, flags, width, precision, size));
 }
-/************************* PRINT A STRING *************************/
+/* PRINT A STRING */
 /**
  * print_string - Prints a string
  * @types: List a of arguments
@@ -58,7 +58,7 @@ int print_string(va_list types, char buffer[],
 	{
 		if (flags & F_MINUS)
 		{
-			write(1, &str[0], length);
+			write(1, &*str, length);
 			for (i = width - length; i > 0; i--)
 				write(1, " ", 1);
 			return (width);
@@ -67,7 +67,7 @@ int print_string(va_list types, char buffer[],
 		{
 			for (i = width - length; i > 0; i--)
 				write(1, " ", 1);
-			write(1, &str[0], length);
+			write(1, &*str, length);
 			return (width);
 		}
 	}
