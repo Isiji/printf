@@ -1,93 +1,66 @@
 #include "main.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-/* @flush_buffer: allocates buffer memory*/
 
-void flush_buffer(char buffer[], int *buffer_idx, int *char_count)
-{
-	write_to_buffer_or_stdout(buffer, buffer_idx, char_count, NULL, 0, 0);
-}
+void print_buffer(char buffer[], int *buff_ind);
 
-int handle_fmt_spe(char fmt_specifier, va_list args,
-		char buffer[], int *buffer_idx, int flags, int field_width, int precision)
-{
-	fmt_t fx[] = {
-		{'c', print_char}, {'s', print_str},
-		{'%', print_percent}, {'d', print_int},
-		{'i', print_int}, {'p', print_pointer},
-		{'o', print_oct}, {'u', print_unsign},
-		{'x', print_hex}, {'X', print_hex_upp},
-		{'r', print_reversed_str}, {'R', print_rot13_str},
-		{'\0', NULL}
-	};
-
-	int i = 0;
-
-	while (fx[i].fmt != '\0')
-	{
-		if (fx[i].fmt == fmt_specifier)
-		{
-			intOC printed = fx[i].func(args, buffer, BUFFER_SIZE - *buffer_idx,
-					flags, field_width, precision);
-			*buffer_idx += printed;
-			return (printed);
-		}
-		i++;
-	}
-
-	/* Handle Invalid format specifier */
-	if (buffer_size >= 2)
-	{
-		buffer[0] = '%';
-		buffer[1] = fmt_specifier;
-		*buffer_idx += 2;
-		return (2);
-	}
-	else
-	{
-		write_to_buffer_or_stdout(buffer, &buffer_size, buffer_idx, "%", 1, flags);
-		write_to_buffer_or_stdout(buffer, &buffer_size,
-				buffer_idx, &fmt_specifier, 1, flags);
-		return (2);
-	}
-}
-/* @_printf: prints characters to the standard output*/
-
+/**
+ * _printf - Printf function
+ * @format: format.
+ * Return: Printed chars.
+ */
 int _printf(const char *format, ...)
 {
-	char buffer[BUFFER_SIZE];
-	int buffer_idx = 0, char_count = 0;
-	va_list args;
+	int i, printed = 0, printed_chars = 0;
+	int flags, width, precision, size, buff_ind = 0;
+	va_list file;
+	char buffer[BUFF_SIZE];
 
-	if (!format)
+	if (format == NULL)
 		return (-1);
-	va_start(args, format);
 
-	for (int i = 0; format[i]; ++i)
+	va_start(file, format);
+
+	for (i = 0; format && *format != '\0'; i++)
 	{
-		if (format[i] == '%')
+		if (*format != '%')
 		{
-			++i;
-			int flags = 0, field_width = 0, precision = -1;
+			buffer[buff_ind++] = *format;
+			if (buff_ind == BUFF_SIZE)
+				print_buffer(buffer, &buff_ind);
 
-			i = handle_flags(format, i, &flags);
-			i = handle_field_width(format, i, &field_width);
-			i = handle_precision(format, i, &precision);
-			int printed = handle_fmt_spe(format[i], args, buffer,
-					&buffer_idx, flags, field_width, precision);
-			char_count += printed;
+			printed_chars++;
 		}
 		else
 		{
-			buffer[buffer_idx++] = format[i];
-			if (buffer_idx == BUFFER_SIZE)
-				flush_buffer(buffer, &buffer_idx, &char_count);
+			print_buffer(buffer, &buff_ind);
+			flags = get_flags(format, &i);
+			width = get_width(format, &i, file);
+			precision = get_precision(format, &i, file);
+			size = csize(format, &i);
+			++i;
+			printed = handle_print(format, &i, file, buffer,
+				flags, width, precision, size);
+			if (printed == -1)
+				return (-1);
+			printed_chars += printed;
 		}
 	}
 
-	flush_buffer(buffer, &buffer_idx, &char_count);
-	va_end(args);
-	return (char_count);
+	print_buffer(buffer, &buff_ind);
+
+	va_end(file);
+
+	return (printed_chars);
+}
+
+/**
+ * print_buffer - Prints the contents of the buffer if it exist
+ * @buffer: Array of chars
+ * @buff_ind: Index at which to add next char, represents the length.
+ */
+void print_buffer(char buffer[], int *buff_ind)
+{
+	if (*buff_ind > 0)
+		write(1, &buffer[0], *buff_ind);
+
+	*buff_ind = 0;
 }
