@@ -26,7 +26,7 @@ int _printf(const char *format, ...);
  *
  * @fmt: The format.
  * @fn: The function associated.
- * */
+ */
 struct fmt
 {
 	char fmt;
@@ -80,7 +80,7 @@ int print_hexadecimal(va_list types, char buffer[],
 		int flags, int width, int precision, int size);
 int print_hexa_upper(va_list types, char buffer[],
 		int flags, int width, int precision, int size);
-int print_hexa(va_list types, char map_to[], char buffer[], 
+int print_hexa(va_list types, char map_to[], char buffer[],
 		int flags, char flag_ch, int width, int precision, int size);
 
 /* Function to print non printable characters */
