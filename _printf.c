@@ -34,7 +34,7 @@ int _printf(const char *format, ...)
 		{
 			print_buffer(buffer, &buff_ind);
 			flags = get_flags(format, &j);
-			width = get_width(format, &j, file);
+			width = cwidth(format, &j, file);
 			precision = get_precision(format, &j, file);
 			size = csize(format, &j);
 			++j;
